@@ -17,15 +17,20 @@
 package com.mongodb.m101j.crud;
 
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.ReadPreference;
-import com.mongodb.ServerAddress;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import org.bson.BsonDocument;
+import static com.mongodb.m101j.util.Helpers.printJson;
+import org.bson.Document;
 
 public class App {
     public static void main(String[] args) {
-
+        MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
+        MongoDatabase database = client.getDatabase("students");
+        MongoCollection<Document> collection = database.getCollection("grades");
+        
+        System.out.println("Find one:");
+        Document first = collection.find().first();
+        printJson(first);
     }
 }
