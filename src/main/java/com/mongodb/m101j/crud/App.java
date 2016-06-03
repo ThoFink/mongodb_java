@@ -20,8 +20,13 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import static com.mongodb.client.model.Filters.eq;
+import com.mongodb.client.model.Sorts;
 import static com.mongodb.m101j.util.Helpers.printJson;
+import java.util.ArrayList;
+import java.util.List;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 public class App {
     public static void main(String[] args) {
@@ -29,8 +34,39 @@ public class App {
         MongoDatabase database = client.getDatabase("students");
         MongoCollection<Document> collection = database.getCollection("grades");
         
-        System.out.println("Find one:");
-        Document first = collection.find().first();
-        printJson(first);
+//        System.out.println("Find one:");
+//        Document first = collection.find().first();
+//        printJson(first);
+        
+        Bson filter = eq("type", "homework");    
+        
+        Bson sort = Sorts.orderBy(Sorts.ascending("student_id"), Sorts.descending("score"));
+        
+        List<Document> all = collection.find(filter)
+                                        .sort(sort)
+                                        .into(new ArrayList<Document>());
+        List<Document> all2 = new ArrayList<Document>();
+
+        for (Document cur : all) {
+            printJson(cur);
+        }
+        
+//        for (int i = 0; i < all.size(); i++){
+//            if (i%2 != 0){
+//                all2.add(all.get(i));
+//            }
+//        }
+//        
+//        for (Document cur1 : all2){
+//            //printJson(cur1);
+//            collection.deleteOne(cur1);
+//        }
+        
+        
+            
+        
+        long count = collection.count();
+        System.out.println(count);
+        
     }
 }
