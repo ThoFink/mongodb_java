@@ -20,7 +20,9 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import static com.mongodb.client.model.Filters.eq;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Sorts;
 import static com.mongodb.m101j.util.Helpers.printJson;
 import java.util.ArrayList;
@@ -31,26 +33,29 @@ import org.bson.conversions.Bson;
 public class App {
     public static void main(String[] args) {
         MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
-        MongoDatabase database = client.getDatabase("students");
-        MongoCollection<Document> collection = database.getCollection("grades");
+        MongoDatabase database = client.getDatabase("video");
+        MongoCollection<Document> collection = database.getCollection("movieDetails");
         
 //        System.out.println("Find one:");
 //        Document first = collection.find().first();
 //        printJson(first);
-        
-        Bson filter = eq("type", "homework");    
-        
-        Bson sort = Sorts.orderBy(Sorts.ascending("student_id"), Sorts.descending("score"));
-        
-        List<Document> all = collection.find(filter)
-                                        .sort(sort)
+//        
+          Bson filter = eq("countries.1", "Sweden");
+          
+          Bson pro = Projections.slice("countries", 1, 1);
+//        
+          
+//        
+          List<Document> all = collection.find(filter)
                                         .into(new ArrayList<Document>());
-        List<Document> all2 = new ArrayList<Document>();
-
-        for (Document cur : all) {
-            printJson(cur);
-        }
-        
+          
+//        List<Document> all2 = new ArrayList<Document>();
+//
+            for (Document cur : all) {
+                printJson(cur);                
+            }
+            System.out.println(all.size());
+    //        
 //        for (int i = 0; i < all.size(); i++){
 //            if (i%2 != 0){
 //                all2.add(all.get(i));
