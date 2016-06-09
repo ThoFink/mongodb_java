@@ -18,14 +18,17 @@ package com.mongodb.m101j.crud;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import static com.mongodb.client.model.Filters.eq;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Sorts;
 import static com.mongodb.m101j.util.Helpers.printJson;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -33,45 +36,54 @@ import org.bson.conversions.Bson;
 public class App {
     public static void main(String[] args) {
         MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
-        MongoDatabase database = client.getDatabase("video");
-        MongoCollection<Document> collection = database.getCollection("movieDetails");
+        MongoDatabase database = client.getDatabase("school");
+        MongoCollection<Document> collection = database.getCollection("students");
         
 //        System.out.println("Find one:");
 //        Document first = collection.find().first();
 //        printJson(first);
 //        
-          Bson filter = eq("countries.1", "Sweden");
+        Bson agg = Aggregates.unwind("scores");
+          Bson filter = eq("scores.type", "homework");
           
-          Bson pro = Projections.slice("countries", 1, 1);
+          Bson pro = new Document("scores.score", 1).append("scores.type", "homework");
+          Bson pro1 = Projections.fields(Projections.include("scores.score", "scores.tpye"));
 //        
+          AggregateIterable<Document> aggre = collection.aggregate(Arrays.asList(Aggregates.unwind("$scores"),Aggregates.match(new Document("$scores.type", "homework")),Aggregates.project(pro)));
           
+          for (Document myDoc : aggre){
+              printJson(myDoc);
+          }
+//            printJson(aggre.first());
 //        
-          List<Document> all = collection.find(filter)
-                                        .into(new ArrayList<Document>());
-          
-//        List<Document> all2 = new ArrayList<Document>();
-//
-            for (Document cur : all) {
-                printJson(cur);                
-            }
-            System.out.println(all.size());
+//          List<Document> all = collection.find(filter)
+//                                        .projection(pro)
+//                                        .into(new ArrayList<Document>());
+//          System.out.println(all.get(0).values());
+//          
+        List<Document> all2 = new ArrayList<Document>();
+
+//            for (Document cur : all) {
+//                printJson(cur);                
+//            }
+//            System.out.println(all.size());
     //        
 //        for (int i = 0; i < all.size(); i++){
 //            if (i%2 != 0){
 //                all2.add(all.get(i));
 //            }
 //        }
-//        
+////        
 //        for (Document cur1 : all2){
 //            //printJson(cur1);
 //            collection.deleteOne(cur1);
 //        }
         
         
-            
-        
-        long count = collection.count();
-        System.out.println(count);
+//            
+//        
+//        long count = collection.count();
+//        System.out.println(count);
         
     }
 }
