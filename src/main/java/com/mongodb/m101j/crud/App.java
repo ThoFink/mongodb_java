@@ -46,14 +46,24 @@ public class App {
         Bson agg = Aggregates.unwind("scores");
           Bson filter = eq("scores.type", "homework");
           
-          Bson pro = new Document("scores.score", 1).append("scores.type", "homework");
-          Bson pro1 = Projections.fields(Projections.include("scores.score", "scores.tpye"));
+//          Bson pro = new Document("scores.score", 1).append("scores.type", "homework");
+          Bson pro1 = Projections.fields(Projections.include("scores.score"));
 //        
-          AggregateIterable<Document> aggre = collection.aggregate(Arrays.asList(Aggregates.unwind("$scores"),Aggregates.match(new Document("$scores.type", "homework")),Aggregates.project(pro)));
+          AggregateIterable<Document> aggre = collection.aggregate(Arrays.asList(Aggregates.unwind("$scores"), Aggregates.match(filter), Aggregates.project(pro1)));
+          
+          List<Document> myList = new ArrayList<Document>();
           
           for (Document myDoc : aggre){
-              printJson(myDoc);
+              myList.add(myDoc);              
           }
+          
+          for (Document myDoc1 : myList){
+              printJson(myDoc1);
+          }
+//          System.out.println(aggre.first());
+//          Bson filter1 = new Document("type", "homework");
+//          Document myDoc = aggre.first();
+          
 //            printJson(aggre.first());
 //        
 //          List<Document> all = collection.find(filter)
