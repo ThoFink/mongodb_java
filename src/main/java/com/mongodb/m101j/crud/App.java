@@ -23,9 +23,11 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.and;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.Updates;
@@ -40,8 +42,8 @@ import org.bson.conversions.Bson;
 public class App {
     public static void main(String[] args) {
         MongoClient client = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
-        MongoDatabase database = client.getDatabase("blog");
-        MongoCollection<Document> collection = database.getCollection("posts");
+        MongoDatabase database = client.getDatabase("test");
+        MongoCollection<Document> collection = database.getCollection("zips");
         
         long num = collection.count();
         System.out.println(num);        
@@ -55,20 +57,27 @@ public class App {
 //        Document first = collection.find().first();
 //        printJson(first);
 //        
-        Bson agg = Aggregates.unwind("comments");
-          Bson filter = eq("scores.type", "homework");
+//        Bson agg = Aggregates.unwind("comments");
+//          Bson filter = eq("scores.type", "homework");
+        Bson filter = Filters.or(eq("state", "CA"), eq("state", "NY"));
+        
 //          
 ////          Bson pro = new Document("scores.score", 1).append("scores.type", "homework");
-          Bson pro1 = Projections.fields(Projections.include("scores.score"));
+//          Bson pro1 = Projections.fields(Projections.include("scores.score"));
         
-        AggregateIterable<Document> aggre = collection.aggregate(Arrays.asList(new Document("$unwind", "$comments"),new Document("$group", new Document("_id", "$comments.author").append("count", new Document("$sum", 1))), new Document("$sort", new Document("count", -1))));
+        //List<Bson> pipe = Arrays.asList(Aggregates.group("$state", Accumulators.avg("avg_pop", "$pop")));
+        List<Bson> pipe = Arrays.asList(Aggregates.match(Filters.gte("pop", 25000)), Aggregates.match(Filters.or(Filters.eq("state", "CA"), Filters.eq("state", "NY"))), Aggregates.group("$state", Accumulators.avg("avg_pop", "$pop")));
+        
+        List<Document> aggre = collection.aggregate(pipe).into(new ArrayList<Document>());
+        //new Document("state", "CA")
+        //.append("state", "NY")
 ////        
 //        AggregateIterable<Document> aggre = collection.aggregate(Arrays.asList(agg));
 //                             
 //          List<Document> myList = new LinkedList<Document>();
 //          
 //          List<Double> scoresList = new LinkedList<Double>();
-//          
+////          
           for (Document myDoc : aggre){
               printJson(myDoc);
 //              myList.add(myDoc);              
